@@ -24,4 +24,5 @@ public class MemberResponseDto {
 		this.image = "https://kang--bucket.s3.ap-northeast-2.amazonaws.com/" + member.getImage();
 		this.status = member.getStatus();
 	}
+
 }

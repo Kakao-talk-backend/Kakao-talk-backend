@@ -3,8 +3,10 @@ package com.sparta.kakaotalkbackend.domain.member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 @Getter
@@ -20,11 +22,7 @@ public class MemberRequestDto {
 	@NotBlank
 	private String nickname;
 
-//	@NotBlank
-//	private String image;
-
 	private String status;
-
 
 	@NotBlank
 	@Pattern(regexp = "[a-z0-9]{4,32}", message = "비밀번호양식을 확인해주세요!")
@@ -33,5 +31,14 @@ public class MemberRequestDto {
 	@NotBlank
 	private String passwordCheck;
 
+	@Getter
+	@Setter
+	public static class Signout {
+		@NotEmpty(message = "잘못된 요청입니다.")
+		private String accessToken;
+
+		@NotEmpty(message = "잘못된 요청입니다.")
+		private String refreshToken;
+	}
 
 }

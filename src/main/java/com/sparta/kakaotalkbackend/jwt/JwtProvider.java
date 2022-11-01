@@ -37,7 +37,7 @@ public class JwtProvider {
 	}
 
 	// 토큰만들기
-	public TokenDto generateTokenDto(Authentication authentication) {
+	public TokenDto generateToken(Authentication authentication) {
 
 		long now = (new Date()).getTime();
 
@@ -105,6 +105,15 @@ public class JwtProvider {
 			return bearerToken.substring(7);
 		}
 		return null;
+	}
+
+	// 토큰의 남은 유효시간 계산
+	public Long getExpiration(String accessToken) {
+		// accessToken 남은 유효시간
+		Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody().getExpiration();
+		// 현재 시간
+		Long now = new Date().getTime();
+		return (expiration.getTime() - now);
 	}
 }
 

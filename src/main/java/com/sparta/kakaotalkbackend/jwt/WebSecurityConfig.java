@@ -3,6 +3,7 @@ package com.sparta.kakaotalkbackend.jwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -17,13 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
 	private final JwtProvider jwtProvider;
+	private final RedisTemplate redisTemplate;
 
 	//암호화 하지않으면 security 에서 로그인을 막음
 	@Bean
-	public BCryptPasswordEncoder encodePassword() {
-
-		return new BCryptPasswordEncoder();
-	}
+	public BCryptPasswordEncoder encodePassword() { return new BCryptPasswordEncoder(); }
 
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
@@ -53,7 +52,7 @@ public class WebSecurityConfig {
 				.anyRequest().permitAll()
 				.and()
 				//JWT 토큰 필터 처리하는 부분
-				.addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(new JwtFilter(jwtProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 }

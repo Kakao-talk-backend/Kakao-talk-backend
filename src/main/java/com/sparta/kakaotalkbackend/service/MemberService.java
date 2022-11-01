@@ -12,6 +12,7 @@ import com.sparta.kakaotalkbackend.repository.RefreshTokenRepository;
 import com.sparta.kakaotalkbackend.util.AmazonS3ResourceStorage;
 import com.sparta.kakaotalkbackend.util.MultipartUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static com.sparta.kakaotalkbackend.util.MultipartUtil.createPath;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class MemberService {
 	private final AmazonS3ResourceStorage amazonS3ResourceStorage;
 	private final JwtProvider jwtProvider;
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
+	private final RedisTemplate redisTemplate;
 
 
 	//가입한 회원인지 아닌지 유효성 검사해주는 method
@@ -59,7 +64,8 @@ public class MemberService {
 		/*
 		이미지 업로드
 		 */
-		String image = MultipartUtil.createPath(multipartFile);
+		String image = createPath(multipartFile);
+		System.out.println(image);
 		amazonS3ResourceStorage.store(image, multipartFile);
 
 		Member member = Member.builder()
@@ -96,7 +102,12 @@ public class MemberService {
 		//    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
 		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-		TokenDto tokenDto = jwtProvider.generateTokenDto(authentication);
+		// 3. 인증 정보를 기반으로 JWT 토큰 생성
+		TokenDto tokenDto = jwtProvider.generateToken(authentication);
+
+		// 4. RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
+		redisTemplate.opsForValue()
+				.set("RT:" + authentication.getName(), tokenDto.getRefreshToken(), tokenDto.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
 		RefreshToken refreshToken = RefreshToken.builder()
 				.key(authentication.getName())
@@ -109,5 +120,31 @@ public class MemberService {
 		httpServletResponse.addHeader("Refresh_Token", tokenDto.getRefreshToken());
 
 		return ResponseDto.success("로그인 성공");
+	}
+
+	// 로그아웃
+	public ResponseDto<String> signout(MemberRequestDto.Signout signout) {
+
+		// 1. Access Token 검증
+		if (!jwtProvider.validateToken(signout.getAccessToken())) {
+			return ResponseDto.fail(400,"잘못된 요청입니다.", "BAD_REQUEST");
+		}
+
+		// 2. Access Token 에서 User email 을 가져옵니다.
+		Authentication authentication = jwtProvider.getAuthentication(signout.getAccessToken());
+
+		// 3. Redis 에서 해당 User email 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
+		if (redisTemplate.opsForValue().get("RT:" + authentication.getName()) != null) {
+			// Refresh Token 삭제
+			redisTemplate.delete("RT:" + authentication.getName());
+		}
+
+		// 4. 해당 Access Token 유효시간 가지고 와서 BlackList 로 저장하기
+		// (블랙리스트라고 하지만 실제로는 그냥 key : value -> 토큰 값 : signout 이라는 로그아웃을 확인할 수 있게 등록)
+		Long expiration = jwtProvider.getExpiration(signout.getAccessToken());
+		redisTemplate.opsForValue()
+				.set(signout.getAccessToken(), "signout", expiration, TimeUnit.MILLISECONDS);
+
+		return ResponseDto.success("로그아웃 되었습니다.");
 	}
 }
