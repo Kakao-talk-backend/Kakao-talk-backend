@@ -3,7 +3,6 @@ package com.sparta.kakaotalkbackend.service;
 import com.sparta.kakaotalkbackend.domain.ResponseDto;
 import com.sparta.kakaotalkbackend.domain.member.Member;
 import com.sparta.kakaotalkbackend.domain.member.MemberResponseDto;
-import com.sparta.kakaotalkbackend.domain.member.ProfileUpdateRequest;
 import com.sparta.kakaotalkbackend.util.AmazonS3ResourceStorage;
 import com.sparta.kakaotalkbackend.util.MultipartUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +16,11 @@ public class ProfileService {
 
     private final AmazonS3ResourceStorage amazonS3ResourceStorage;
 
+
     /*
     마이 프로필 조회
      */
     public ResponseDto<MemberResponseDto> getMyProfile(Member member) {
-//        check.memberExist(member);
         return ResponseDto.success(new MemberResponseDto(member));
     }
 
@@ -29,15 +28,20 @@ public class ProfileService {
     마이 프로필 수정
      */
     @Transactional
-    public ResponseDto<MemberResponseDto> updateMyProfile(ProfileUpdateRequest profileUpdateRequest,
+    public ResponseDto<MemberResponseDto> updateMyProfile(String nickname,
+                                                          String status,
                                                           MultipartFile multipartFile,
                                                           Member member) {
-//        check.memberExist(member);
+
+
+        if (nickname == null) nickname = member.getNickname();
+        if (status == null) status = member.getStatus();
 
         String image = MultipartUtil.createPath(multipartFile);
+        if (image == null) image = member.getImage();
         amazonS3ResourceStorage.store(image, multipartFile);
 
-        member.update(profileUpdateRequest);
+        member.update(nickname, status, image);
         return ResponseDto.success(new MemberResponseDto(member));
     }
 }

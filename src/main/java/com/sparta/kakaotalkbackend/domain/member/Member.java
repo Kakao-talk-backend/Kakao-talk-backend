@@ -17,34 +17,34 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class Member {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "member_id")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
+    private Long id;
 
-	@Column(nullable = false, unique = true)
-	private String username;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-	@Column(nullable = false)
-	private String nickname;
+    @Column(nullable = false)
+    private String nickname;
 
-	@Column(nullable = false) // &&&& default 이미지 저장
-	private String image;
+    @Column(nullable = false) // &&&& default 이미지 저장
+    private String image;
 
-	@JsonIgnore
-	@Column(nullable = false)
-	private String password;
+    @JsonIgnore
+    @Column(nullable = false)
+    private String password;
 
-	@Column
-	private String status;
+    @Column
+    private String status;
 
-	public boolean validatePassword(PasswordEncoder passwordEncoder, String password) {
-		return passwordEncoder.matches(password, this.password);
-	}
+    public boolean validatePassword(PasswordEncoder passwordEncoder, String password) {
+        return passwordEncoder.matches(password, this.password);
+    }
 
-    public void update(ProfileUpdateRequest profileupdateRequest) {
-        this.nickname = profileupdateRequest.getNickname();
-        this.image = profileupdateRequest.getImage();
-        this.status = profileupdateRequest.getStatus();
+    public void update(String nickname, String status, String image) {
+        this.nickname = nickname;
+        this.image = image;
+        this.status = status;
     }
 }
