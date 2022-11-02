@@ -29,7 +29,7 @@ public class JwtFilter extends GenericFilter {
 
 		// 2. validateToken 으로 토큰 유효성 검사
 		if (jwt != null && jwtProvider.validateToken(jwt)) {
-			// Redis(블랙리스트)에서 해당 accessToken logout 여부 확인
+			// Redis(블랙리스트)에서 해당 accessToken signout 여부 확인
 			String isSignout = (String)redisTemplate.opsForValue().get(jwt);
 			// Redis(블랙리스트)에 없을 경우
 			if (ObjectUtils.isEmpty(isSignout)) {

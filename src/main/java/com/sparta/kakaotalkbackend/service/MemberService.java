@@ -12,6 +12,9 @@ import com.sparta.kakaotalkbackend.repository.RefreshTokenRepository;
 import com.sparta.kakaotalkbackend.util.AmazonS3ResourceStorage;
 import com.sparta.kakaotalkbackend.util.MultipartUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -22,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,8 @@ public class MemberService {
     private final AmazonS3ResourceStorage amazonS3ResourceStorage;
     private final JwtProvider jwtProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final RedisTemplate redisTemplate;
+
 
 
     //가입한 회원인지 아닌지 유효성 검사해주는 method
@@ -44,7 +50,6 @@ public class MemberService {
     //회원가입
     @Transactional
     public ResponseDto<String> registerUser(MemberRequestDto memberRequestDto, MultipartFile multipartFile) {
-
 
         //중복처리
         if (null != isPresentMember(memberRequestDto.getUsername())) {
@@ -61,7 +66,6 @@ public class MemberService {
 		 */
         String image = MultipartUtil.createPath(multipartFile);
         amazonS3ResourceStorage.store(image, multipartFile);
-
 
         Member member = Member.builder()
                 .username(memberRequestDto.getUsername())
@@ -97,7 +101,7 @@ public class MemberService {
         //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        TokenDto tokenDto = jwtProvider.generateTokenDto(authentication);
+        TokenDto tokenDto = jwtProvider.generateToken(authentication);
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .key(authentication.getName())
@@ -111,4 +115,28 @@ public class MemberService {
 
         return ResponseDto.success("로그인 성공");
     }
+
+    public ResponseDto<?> signout(MemberRequestDto.Signout signout) {
+        // 1. Access Token 검증
+        if (!jwtProvider.validateToken(signout.getAccessToken())) {
+            return ResponseDto.fail(400, "잘못된 요청입니다.","Bad Request");
+        }
+
+        // 2. Access Token 에서 User email 을 가져옵니다.
+        Authentication authentication = jwtProvider.getAuthentication(signout.getAccessToken());
+
+        // 3. Redis 에서 해당 User email 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
+        if (redisTemplate.opsForValue().get("RT:" + authentication.getName()) != null) {
+            // Refresh Token 삭제
+            redisTemplate.delete("RT:" + authentication.getName());
+        }
+
+        // 4. 해당 Access Token 유효시간 가지고 와서 BlackList 로 저장하기
+        Long expiration = jwtProvider.getExpiration(signout.getAccessToken());
+        redisTemplate.opsForValue()
+                .set(signout.getAccessToken(), "signout", expiration, TimeUnit.MILLISECONDS);
+
+        return ResponseDto.success("로그아웃 되었습니다.");
+    }
+
 }

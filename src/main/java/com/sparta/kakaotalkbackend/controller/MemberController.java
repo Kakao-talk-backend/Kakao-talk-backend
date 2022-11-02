@@ -42,7 +42,7 @@ public class MemberController {
 
     // 로그아웃
     @PostMapping("/signout")
-    public ResponseDto<String> logout(@Validated MemberRequestDto.Signout signout) {
+    public ResponseDto<?> signout(@Validated MemberRequestDto.Signout signout) {
         return memberService.signout(signout);
     }
 
