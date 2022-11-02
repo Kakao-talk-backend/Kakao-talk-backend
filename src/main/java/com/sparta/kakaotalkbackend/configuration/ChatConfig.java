@@ -14,8 +14,8 @@ public class ChatConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws/chat") // 클란이언트에서 서버로 웹소켓 요청을 할 때 핸드셰이크 하기위한 엔드포인트 설정
-                .setAllowedOriginPatterns("*") // 도메인이 다른 서버에서도 접속할 수 있도록 cors 설정을 위해 모든 origin 에 대해 허용하는 설정
-                .withSockJS(); // 클라이언트와의 연결은 SockJS 로 하기 때문에 SockJS 연결
+                .setAllowedOriginPatterns("*"); // 도메인이 다른 서버에서도 접속할 수 있도록 cors 설정을 위해 모든 origin 에 대해 허용하는 설정
+//                .withSockJS(); // 클라이언트와의 연결은 SockJS 로 하기 때문에 SockJS 연결
     }
 
     @Override

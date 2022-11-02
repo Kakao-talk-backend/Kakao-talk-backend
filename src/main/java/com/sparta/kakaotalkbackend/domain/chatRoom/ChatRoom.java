@@ -1,30 +1,39 @@
 package com.sparta.kakaotalkbackend.domain.chatRoom;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.UUID;
 
 @Getter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class ChatRoom {
 
-    @Id
-    private String roomId;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column
     private String roomName;
 
-    public static ChatRoom create(String roomName) {
-        ChatRoom room = new ChatRoom();
-        room.roomId = UUID.randomUUID().toString();
-        room.roomName = roomName;
-        return room;
+    @Column
+    private String me;
+
+    @Column
+    private String you;
+//
+//    public static ChatRoom create(String roomName) {
+//        ChatRoom room = new ChatRoom();
+//        room.roomId = UUID.randomUUID().toString();
+//        room.roomName = roomName;
+//        return room;
+//    }
+
+    public ChatRoom(String roomName, String me, String you) {
+        this.roomName = roomName;
+        this.me = me;
+        this.you = you;
     }
+
 }

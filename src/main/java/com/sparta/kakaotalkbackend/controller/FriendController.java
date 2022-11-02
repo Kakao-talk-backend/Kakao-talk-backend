@@ -47,4 +47,5 @@ public class FriendController {
     public ResponseDto<MemberResponseDto> getFriend(@PathVariable Long friendId) {
         return friendService.getFriend(friendId);
     }
+
 }
