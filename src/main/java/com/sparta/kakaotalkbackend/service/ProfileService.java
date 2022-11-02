@@ -33,7 +33,7 @@ public class ProfileService {
                                                           String status,
                                                           MultipartFile multipartFile,
                                                           Member member) {
-//
+
 //        if (nickname == null) nickname = member.getNickname();
 //        if (status == null) status = member.getStatus();
 
