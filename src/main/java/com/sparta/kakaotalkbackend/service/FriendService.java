@@ -22,21 +22,21 @@ public class FriendService {
     private final MemberRepository memberRepository;
 
     // DB에 friend 데이터가 있는지 검사
-    public Friend isPresentFriend(String username) {
-        Optional<Friend> optionalFriend = friendRepository.findByUsername(username);
+    public Friend isPresentFriend(String username, String myUsername) {
+        Optional<Friend> optionalFriend = friendRepository.findByUsernameAndMyUsername(username, myUsername);
         return optionalFriend.orElse(null);
     }
 
     // 친구 찾기 + 추가
-    public ResponseDto<FriendResponseDto> addFriend (Member member, FriendRequestDto requestDto){
+    public ResponseDto<FriendResponseDto> addFriend(Member member, FriendRequestDto requestDto) {
         // memberRepository에서 등록된 회원 username으로 찾기
         Optional<Member> findFriend = memberRepository.findByUsername(requestDto.getUsername());
         // 찾으려는 유저가 없거나, 본인의 username으로 찾으려 할 때 예외처리
-        if(findFriend.isEmpty() || findFriend.get().getId().equals(member.getId())){
+        if (findFriend.isEmpty() || findFriend.get().getId().equals(member.getId())) {
             return ResponseDto.fail(404, "사용자를 찾을 수 없습니다.", "Not Found");
         }
         // 이미 친구로 등록되어있을 경우 예외처리
-        if(null != isPresentFriend(findFriend.get().getUsername())) {
+        if (null != isPresentFriend(findFriend.get().getUsername(), member.getUsername())) {
             return ResponseDto.fail(404, "이미 등록된 친구입니다.", "Not Found");
         }
 
@@ -61,12 +61,12 @@ public class FriendService {
     }
 
     // 친구 목록 조회
-    public ResponseDto<List<MemberResponseDto>> getAllFriends (Member member){
+    public ResponseDto<List<MemberResponseDto>> getAllFriends(Member member) {
         // friendRepository에서 나의이름을 기준으로 찾기 (나와 연결된 친구를 찾기 위해)
         List<Friend> findFriendList = friendRepository.findAllByMyUsername(member.getUsername());
         List<MemberResponseDto> friendList = new ArrayList<>();
 
-        for (Friend friend:findFriendList) {
+        for (Friend friend : findFriendList) {
             friendList.add(
                     MemberResponseDto.builder()
                             .id((friend.getId()))
@@ -81,7 +81,7 @@ public class FriendService {
     }
 
     // 친구 프로필 조회
-    public ResponseDto<MemberResponseDto> getFriend (Long friendId){
+    public ResponseDto<MemberResponseDto> getFriend(Long friendId) {
         Optional<Friend> friend = friendRepository.findById(friendId);
 
         return ResponseDto.success(

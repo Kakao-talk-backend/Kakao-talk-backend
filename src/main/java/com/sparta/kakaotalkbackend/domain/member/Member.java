@@ -42,9 +42,13 @@ public class Member {
 		return passwordEncoder.matches(password, this.password);
 	}
 
-    public void update(ProfileUpdateRequest profileupdateRequest) {
-        this.nickname = profileupdateRequest.getNickname();
-        this.image = profileupdateRequest.getImage();
-        this.status = profileupdateRequest.getStatus();
+    public void update(String nickname, String status, String image) {
+        this.nickname = nickname;
+        this.image = "https://kang--bucket.s3.ap-northeast-2.amazonaws.com/" + image;
+        this.status = status;
     }
+	public void update(String nickname, String status) {
+		this.nickname = nickname;
+		this.status = status;
+	}
 }

@@ -23,10 +23,11 @@ public class ProfileController {
     }
 
     @PutMapping
-    public ResponseDto<MemberResponseDto> updateMyProfile(@RequestPart ProfileUpdateRequest profileUpdateRequest,
+    public ResponseDto<MemberResponseDto> updateMyProfile(@RequestPart String nickname,
+                                                          @RequestPart String status,
                                                           @RequestPart(value = "file", required = false) MultipartFile multipartFile,
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return profileService.updateMyProfile(profileUpdateRequest, multipartFile, userDetails.getMember());
+        return profileService.updateMyProfile(nickname, status, multipartFile, userDetails.getMember());
     }
 
 
