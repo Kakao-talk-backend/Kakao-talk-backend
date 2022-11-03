@@ -32,14 +32,14 @@ public class FriendController {
 
     // 친구 추가+검색
     @PostMapping("/friends")
-    public ResponseDto<FriendResponseDto> addFriend(@AuthenticationPrincipal UserDetailsImpl userDtails, @RequestBody FriendRequestDto requestDto) {
-        return friendService.addFriend(userDtails.getMember(), requestDto);
+    public ResponseDto<FriendResponseDto> addFriend(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody FriendRequestDto requestDto) {
+        return friendService.addFriend(userDetails.getMember(), requestDto);
     }
 
     // 친구 리스트 조회
     @GetMapping("/friends")
-    public ResponseDto<List<MemberResponseDto>> getAllFriends(@AuthenticationPrincipal UserDetailsImpl userDtails) {
-        return friendService.getAllFriends(userDtails.getMember());
+    public ResponseDto<List<MemberResponseDto>> getAllFriends(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return friendService.getAllFriends(userDetails.getMember());
     }
 
     // 친구 프로필 조회

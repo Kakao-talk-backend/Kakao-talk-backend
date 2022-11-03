@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+//@RequestMapping("/chat")
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;

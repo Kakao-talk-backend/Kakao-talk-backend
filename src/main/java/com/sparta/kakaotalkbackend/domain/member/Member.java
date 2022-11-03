@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Builder
 @Entity
@@ -30,6 +31,10 @@ public class Member {
 
 	@Column(nullable = false) // &&&& default 이미지 저장
 	private String image;
+
+//	@Column
+//	@Convert
+//	private List<String> friends;
 
 	@JsonIgnore
 	@Column(nullable = false)

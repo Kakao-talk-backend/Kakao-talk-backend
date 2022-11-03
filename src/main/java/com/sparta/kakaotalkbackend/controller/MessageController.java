@@ -17,6 +17,6 @@ public class MessageController {
     // applicationDestinationPrefixes 와 MessageMapping 의 경로가 합쳐짐
     @MessageMapping("/chat/message")
     public void enter(Message message) {
-        sendingOperations.convertAndSend("topic/chat/room/" + message.getRoomId(),message);
+        sendingOperations.convertAndSend("/topic/chat/room/" + message.getRoomId(),message);
     }
 }

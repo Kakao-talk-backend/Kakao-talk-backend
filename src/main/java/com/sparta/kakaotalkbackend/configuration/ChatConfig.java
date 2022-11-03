@@ -21,7 +21,7 @@ public class ChatConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 메세지 브로커가 subscribers 들에게 메세지를 전달할 주소
-        registry.enableSimpleBroker("/queue", "topic");
+        registry.enableSimpleBroker("/queue", "/topic");
         // 클라이언트가 서버로 메세지 보낼 때 붙여야하는 prefix 지정
         registry.setApplicationDestinationPrefixes("/app");
     }

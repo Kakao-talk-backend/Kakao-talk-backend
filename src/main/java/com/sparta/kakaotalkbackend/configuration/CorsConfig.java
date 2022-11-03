@@ -9,7 +9,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://43.201.71.248:8080", "http://localhost:8080", "http://localhost:3000")
+                .allowedOriginPatterns("https://hanghae-kakao-clone.vercel.app/login",
+                        "http://43.201.71.248:8080",
+                        "http://localhost:8080",
+                        "http://localhost:3000")
                 .allowedMethods("*")
                 .exposedHeaders("Access_Token","Refresh_Token")
                 .allowCredentials(true)
