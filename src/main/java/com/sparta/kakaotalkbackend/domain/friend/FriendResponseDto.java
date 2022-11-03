@@ -16,4 +16,5 @@ public class FriendResponseDto {
         private String nickname;
         private String image;
         private String status;
+        private boolean isRoomOpen;
 }

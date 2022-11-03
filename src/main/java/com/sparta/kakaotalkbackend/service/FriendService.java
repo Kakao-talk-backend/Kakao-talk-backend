@@ -29,9 +29,9 @@ public class FriendService {
 
     // 친구 찾기 + 추가
     public ResponseDto<FriendResponseDto> addFriend(Member member, FriendRequestDto requestDto) {
-        // memberRepository에서 등록된 회원 username으로 찾기
+        // memberRepository 에서 등록된 회원 username 으로 찾기
         Optional<Member> findFriend = memberRepository.findByUsername(requestDto.getUsername());
-        // 찾으려는 유저가 없거나, 본인의 username으로 찾으려 할 때 예외처리
+        // 찾으려는 유저가 없거나, 본인의 username 으로 찾으려 할 때 예외처리
         if (findFriend.isEmpty() || findFriend.get().getId().equals(member.getId())) {
             return ResponseDto.fail(404, "사용자를 찾을 수 없습니다.", "Not Found");
         }
@@ -56,13 +56,15 @@ public class FriendService {
                         .nickname(findFriend.get().getNickname())
                         .image(findFriend.get().getImage())
                         .status(findFriend.get().getStatus())
+                        .isRoomOpen(false)
                         .build()
         );
+
     }
 
     // 친구 목록 조회
     public ResponseDto<List<MemberResponseDto>> getAllFriends(Member member) {
-        // friendRepository에서 나의이름을 기준으로 찾기 (나와 연결된 친구를 찾기 위해)
+        // friendRepository 에서 나의이름을 기준으로 찾기 (나와 연결된 친구를 찾기 위해)
         List<Friend> findFriendList = friendRepository.findAllByMyUsername(member.getUsername());
         List<MemberResponseDto> friendList = new ArrayList<>();
 
@@ -94,4 +96,5 @@ public class FriendService {
                         .build()
         );
     }
+
 }
